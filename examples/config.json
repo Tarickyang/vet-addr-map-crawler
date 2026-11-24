@@ -1,0 +1,26 @@
+{
+  "city": "新北市",
+  "start_address": "新北市土城區延吉街（街道代表點）",
+  "transport": "scooter",
+  "primary_url": "https://example.org/vets.csv",
+  "secondary_url": "https://example.org/vets.json",
+  "primary_options": {
+    "complete_confirmed": true,
+    "mapping": {
+      "name": "機構名稱",
+      "address": "地址",
+      "owner": "負責人"
+    }
+  },
+  "secondary_options": {
+    "record_path": "result.records",
+    "complete_confirmed": true
+  },
+  "start_coordinate": {
+    "lat": 24.985565466927,
+    "lon": 121.469033072461
+  },
+  "start_geo_source": "臺北範例已確認的街道代表點（非精確門牌）",
+  "street_tiles": true,
+  "exclude_locations": []
+}

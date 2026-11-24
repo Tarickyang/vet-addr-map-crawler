@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>動物醫院 · 業務工作簿</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header><div class="brand"><span class="mark">V</span><div>動物醫院業務工作簿<small>LOCAL WORKSPACE / WSL</small></div></div><span class="local"><i></i> 本機資料 · 帳號獨立</span></header>
+<main>
+<section class="hero"><div><p class="eyebrow">從名單，到每天的拜訪順序</p><h1>把每一次出發，<br>安排得更清楚。</h1><p>來源彙整、8 家一組、行政區地圖。<br>確認資料後，產出你的業務工作簿。</p></div><div class="hero-card"><span class="eyebrow">YOUR DAILY ROUTE</span><div class="route-art"><b>起點</b><em></em><b>01</b><em></em><b>…</b><em></em><b>08</b></div><p>可跨行政區 · 不返程<br><strong>同一天，同一個顏色。</strong></p></div></section>
+<div id="notice" role="status" hidden></div>
+<div class="workspace-bar"><div><label for="projects">我的專案</label><select id="projects"><option value="">建立新專案</option></select></div><button id="new" class="secondary">＋ 新專案</button><button id="demo" class="secondary">開啟臺北範例</button></div>
+<div class="layout"><section class="panel settings"><div class="section-title"><span class="step">01</span><h2>設定工作範圍</h2></div>
+<form id="config-form">
+<label>縣市<input id="city" required placeholder="例如：新北市"></label>
+<label>出發點地址<input id="start_address" required placeholder="例如：新北市土城區延吉街"></label>
+<label>主要交通<select id="transport"><option value="scooter">白牌機車</option><option value="car">汽車</option><option value="bicycle">自行車</option><option value="walk">步行</option></select></label>
+<div class="fixed">每組最多 <b>8 家</b><span>可跨行政區、不返程</span></div>
+<label>主來源網址<input type="url" id="primary_url" required placeholder="較新的公會名單 / CSV / API"></label>
+<label>次來源網址<input type="url" id="secondary_url" required placeholder="政府開放資料 / CSV / API"></label>
+<p class="hint">主來源有值就優先採用；次來源只補缺。支援 CSV、JSON、HTML 表格。資料入口頁不一定是可擷取網址。</p>
+<details><summary>來源格式、區界與地圖設定</summary>
+<p class="hint">通用來源請確認完整名單後設定 complete_confirmed。欄位對應、分頁說明見套件 README。</p>
+<label>主來源設定 JSON<textarea id="primary_options" rows="4">{"complete_confirmed": false}</textarea></label>
+<label>次來源設定 JSON<textarea id="secondary_options" rows="4">{"complete_confirmed": false}</textarea></label>
+<label>官方區界來源網址<input id="boundary_source" type="url" placeholder="選填；匯入 GeoJSON 時必填"></label>
+<label class="check"><input id="street_tiles" type="checkbox" checked> 下載街道底圖（OpenStreetMap）</label>
+<label>白牌疑似禁行道路排除點 JSON<textarea id="exclude_locations" rows="3">[]</textarea></label>
+<p class="hint">排除點不沿用臺北座標；沒有提供區界時，地圖會註明「未提供官方區界」。</p>
+</details>
+<button type="submit" class="primary wide" id="save-config">建立專案</button>
+</form></section>
+<section class="panel workflow"><div class="section-title"><span class="step">02</span><h2>準備與確認</h2><span id="project-tag" class="badge">尚未建立</span></div>
+<div class="action-card"><div><h3>彙整兩個來源</h3><p>保留來源快照、記錄衝突，人工備注不被更新覆蓋。</p></div><button id="collect" disabled>擷取 / 更新名單</button></div>
+<details class="imports"><summary>使用下載檔、匯回人工備注或官方區界</summary><p class="hint">來源檔支援 UTF-8 CSV/JSON/HTML。匯入後按「擷取 / 更新名單」。已匯入檔案不會自動更新，月更新請改回網址。</p>
+<div class="upload-row"><label>主來源檔<input id="primary-file" type="file" accept=".csv,.json,.html"></label><button data-upload="primary">匯入</button><button data-clear="primary" class="secondary">改回網址</button></div>
+<div class="upload-row"><label>次來源檔<input id="secondary-file" type="file" accept=".csv,.json,.html"></label><button data-upload="secondary">匯入</button><button data-clear="secondary" class="secondary">改回網址</button></div>
+<div class="upload-row"><label>官方區界（WGS84）<input id="boundary-file" type="file" accept=".json,.geojson"></label><button id="upload-boundary">匯入區界</button></div>
+<div class="upload-row"><label>已編輯的工作簿<input id="manual-file" type="file" accept=".xlsx"></label><button id="upload-manual">匯回生日 / 備注</button></div>
+</details>
+<div class="action-card"><div><h3>確認出發位置</h3><p id="start-status">請先建立專案，再確認座標。</p></div><button id="start-geo" class="secondary" disabled>設定位置</button></div>
+<div class="stats"><div><strong id="count">—</strong><span>醫院名單</span></div><div><strong id="missing">—</strong><span>尚待定位</span></div><div><strong id="excluded">—</strong><span>不用去</span></div><div><strong id="pending-count">—</strong><span>資料待確認</span></div></div>
+<div class="action-card output-card"><div><h3>產出行程與工作簿</h3><p>先分組，再求組內最短道路順序。下載含地圖的 Excel 與 PDF。</p></div><button id="generate" class="primary" disabled>規劃並產出</button></div>
+<p class="hint">白牌道路服務僅供規劃參考；疑似禁行路段會列入工作簿。時間不含拜訪、停車與即時交通。</p>
+<div id="downloads"></div><pre id="log" aria-live="polite">等待開始。資料保存在本機 data/，不會寫入原本的臺北 Google 試算表。</pre>
+</section></div>
+<section class="panel records-panel"><div class="section-title"><span class="step">03</span><h2>醫院名單與業務規則</h2><input id="search" placeholder="搜尋名稱、行政區或地址" aria-label="搜尋醫院"><label class="check"><input type="checkbox" id="only-missing"> 只看待定位</label></div>
+<p class="hint">生日、備注、產品限制及「不用去」逐筆儲存；缺少座標不會自動用行政區中心代替。地圖編號與拜訪站序是不同欄位。</p>
+<div class="table-scroll"><table><thead><tr><th>行政區 / 編號</th><th>醫院與地址</th><th>天 / 站</th><th>定位</th><th>生日</th><th>備注 / 產品限制</th><th>不用去</th><th></th></tr></thead><tbody id="records"><tr><td colspan="8" class="empty">建立專案後，名單會顯示在這裡。</td></tr></tbody></table></div>
+<details><summary>待確認紀錄與來源衝突</summary><div id="audit" class="audit"></div></details></section>
+<footer>Vet Workbook Local · 以來源資料為準，缺值留白。每組最多 8 家；不宣稱全市分組為全域最短解。</footer>
+</main>
+<dialog id="geo-dialog"><form method="dialog"><button class="close secondary" aria-label="關閉">✕</button></form><h2 id="geo-title">確認位置</h2><p id="geo-address"></p><button id="lookup" class="secondary">搜尋候選位置</button><p class="hint">搜尋結果只是候選。請核對完整地址與門牌；若只有道路或行政區，請勿採用。來源已有確切座標也可直接填入。</p><div id="candidates"></div>
+<form id="geo-form"><div class="two"><label>緯度<input id="lat" type="number" step="any" required min="20" max="27"></label><label>經度<input id="lon" type="number" step="any" required min="118" max="123"></label></div><label>座標來源 / 佐證網址<input id="geo-source" required placeholder="官方地址資料、院所定位頁等"></label><label class="check"><input id="geo-confirm" type="checkbox" required> 我已核對這是該地址的位置</label><button class="primary wide">確認並儲存</button></form></dialog>
+<script src="/static/app.js" defer></script></body></html>
